@@ -15,7 +15,7 @@ Issue-Assigner is a comprehensive solution designed to automate the assignment o
 ### 3. Frontend Plugin Functionality
 - **Display Recommendations:** Shows recommended developers for the current issue directly within the issue interface.
 - **Model Selection:** Allows users to choose from different available models to view various recommendation results.
-- **Metric Display:** Show the activity level of developers over the past three months (weighted exponentially with more recent time having greater weight), average community OpenRank contribution, and average global OpenRank influence. This helps repository maintainers make more informed decisions.
+- **Metric Display:** Show the `Activity` of developers over the **past three months** (weighted exponentially with more recent time having greater weight), average `Community_OpenRank` contribution, and average `Global_OpenRank` influence. This helps repository maintainers make more informed decisions. Refer to the [Opendigger's doc](https://open-digger.cn/en/docs/user_docs/intro) for the meanings of these metrics.
 - **Feedback Mechanism:** Users can provide feedback on the recommendations using a thumbs-up (approve) or thumbs-down (disapprove). (This project will not be realized. For details, please refer to [Issue-Assigner-BaaS](https://github.com/zhingoll/Issue-Assigner-BaaS).)
 ### 4. Backend Service Functionality
 - **Result Storage:** Stores the recommended results post-model testing for frontend display.
@@ -56,7 +56,7 @@ pip install -r requirements.txt
 ```
 
 ## Usage
-### Get the Specified Repo data
+### Getting the Specified Repo Data
 First, you need to create a `config.yaml` file in the data folder. Examples are as follows:
 ```bash
 mongodb:
@@ -88,12 +88,28 @@ After creating the `config.yaml` file, run:
 python .\data\repo_data_collect.py 
 ```
 This command will get the data of your specified repo and store them in mongodb.
+### Building 'Developer-PR-Issue' Collaboration Graph
+Run the following command to import the data stored in mongodb in the previous step into neo4j and build a 'Developer-PR-Issue' collaboration graph.
+```bash
+python .\data\mongo2neo.py
+```
+### Generating the Raw Materials to Build the Dataset
+Run the following command to generate the raw materials needed for model training datasets. 
+```bash
+python .\data\neo_mongo2csv.py
+```
+After completion, create a new folder in the `dataset` directory, named after the repository. Then, create a subfolder named `raw` within this new folder. Move the generated CSV file into the `raw` folder, which will be used for building datasets in subsequent model training. For specific operations, refer to the example path provided in the project: `dataset\opendigger\raw\....csv`.
 ### Running the Main Application
 Navigate to the project's root directory and run:
 ```bash
 python main.py
 ```
 This command initiates the training and testing of models related to the issue assignment tasks.
+### Obtain Metric Data
+Run the following command to retrieve the developer `Activity` in a specified repository over the **past three months**, as well as the `Community_OpenRank` contribution and the `Global_OpenRank` value. The `Activity` is calculated using an **exponentially weighted sum**, giving greater weight to more recent activity. Other metrics are calculated as **averages**.
+```bash
+python .\server\developer_metrics.py
+```
 ### Using the Frontend Plugin
 #### 1.Load the Plugin in the Browser
 - Open the Edge browser (currently tested only on Edge).
@@ -115,9 +131,10 @@ As the project is still in the experimental stage, the suggested issue is specif
 - Provide **feedback** using the thumbs-up or thumbs-down icons. (This project will not be realized. For details, please refer to [Issue-Assigner-BaaS](https://github.com/zhingoll/Issue-Assigner-BaaS).)
 
 ## Future Plans
-- Feedback Integration: Utilize user feedback combined with the OpenRank algorithm for enhanced model evaluation (feature under development).
 - Model Expansion: Incorporate additional models and algorithms to improve recommendation accuracy.
 - Browser Compatibility: Extend plugin support to other browsers like Chrome and Firefox.
+- Simplify the project use process and make it more convenient for users.
+- Feedback Integration: Utilize user feedback combined with the OpenRank algorithm for enhanced model evaluation (feature under development).
 
 ## Contact
 If you have any questions or suggestions, feel free to open an issue~
