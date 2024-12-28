@@ -6,16 +6,20 @@ Issue-Assigner is a comprehensive solution designed to automate the assignment o
 <p align="center">Issue-Assigner Framework</p>
 
 ## Features
-### 1. Frontend Plugin Functionality
-- **Display Recommendations:** Shows recommended developers for the current issue directly within the issue interface.
-- **Model Selection:** Allows users to choose from different available models to view various recommendation results.
-- **Feedback Mechanism:** Users can provide feedback on the recommendations using a thumbs-up (approve) or thumbs-down (disapprove).
+### 1. Data Acquisition and Updates
+- **Real-time Data Acquisition:** Utilize the GitHub REST API to obtain the latest collaboration data within the repository.
+- **Continuous Updating:** Support incremental training of the model to adapt to dynamic changes in data, meeting the current application needs of repository maintainers.(feature under development)
 ### 2. Issue Assignment Task Benchmark
 - **Unified Framework:** Implements various models for training and testing under a unified framework using [PyTorch Geometric (PyG)](https://github.com/pyg-team/pytorch_geometric).
 - **Module composition:** Includes dataset construction, data loading, and model design tailored for issue assignment tasks.
-### 3. Backend Service Functionality
+### 3. Frontend Plugin Functionality
+- **Display Recommendations:** Shows recommended developers for the current issue directly within the issue interface.
+- **Model Selection:** Allows users to choose from different available models to view various recommendation results.
+- **Metric Display:** Show the activity level of developers over the past three months (weighted exponentially with more recent time having greater weight), average community OpenRank contribution, and average global OpenRank influence. This helps repository maintainers make more informed decisions.
+- **Feedback Mechanism:** Users can provide feedback on the recommendations using a thumbs-up (approve) or thumbs-down (disapprove). (This project will not be realized. For details, please refer to [Issue-Assigner-BaaS](https://github.com/zhingoll/Issue-Assigner-BaaS).)
+### 4. Backend Service Functionality
 - **Result Storage:** Stores the recommended results post-model testing for frontend display.
-- **Feedback Storage and Evaluation:** Records real user feedback from the frontend and utilizes the [OpenRank](https://dl.acm.org/doi/10.1145/3639477.3639734) for subsequent model evaluation (feature under development).
+- **Feedback Storage and Evaluation:** Records real user feedback from the frontend and utilizes the [OpenRank](https://dl.acm.org/doi/10.1145/3639477.3639734) for subsequent model evaluation (feature under development). (This project will not be realized. For details, please refer to [Issue-Assigner-BaaS](https://github.com/zhingoll/Issue-Assigner-BaaS).)
 
 ## Project Structure
 ```plaintext
@@ -41,6 +45,7 @@ Issue-Assigner is a comprehensive solution designed to automate the assignment o
 - **Node.js and npm:** For frontend development (if you plan to modify the frontend)
 - **Browser:** Currently only tested on Edge
 - **MongoDB:** 7.0.1
+- **Neo4j:** 5.12.0
 ### Clone the Repository
 ```bash
 git clone https://github.com/zhingoll/Issue-Assigner.git
@@ -51,6 +56,38 @@ pip install -r requirements.txt
 ```
 
 ## Usage
+### Get the Specified Repo data
+First, you need to create a `config.yaml` file in the data folder. Examples are as follows:
+```bash
+mongodb:
+  db: "your_db_name"
+  url: "your_db_url"
+  tz_aware: true
+  uuidRepresentation: "standard"
+
+tokens:
+  - "your_token1"
+  - "your_token2"
+  ...
+
+projects:
+  - "owner/name" # The repo name you want to get, such as 'X-lab2017/opendigger'
+  ...
+
+neo4j:
+  uri: "your_uri"
+  username: "your_neo4j_name"
+  password: "your_password"
+
+repo: # example
+  owner: "X-lab2017" 
+  name: "open-digger"  # The name(owner/name) of the repo you want to make into a dataset
+```
+After creating the `config.yaml` file, run:
+```bash
+python .\data\repo_data_collect.py 
+```
+This command will get the data of your specified repo and store them in mongodb.
 ### Running the Main Application
 Navigate to the project's root directory and run:
 ```bash
@@ -75,7 +112,7 @@ uvicorn server:app --reload
 #### 3.Interact with the Plugin
 As the project is still in the experimental stage, the suggested issue is specified in the file `opened_issues.csv`. The project path example for this file is: `dataset\opendigger\raw\`. You can experience the functionality of the plugin by using the issue number provided in this file. 
 - Use the provided interface to **select different models** and view their recommendations.
-- Provide **feedback** using the thumbs-up or thumbs-down icons.
+- Provide **feedback** using the thumbs-up or thumbs-down icons. (This project will not be realized. For details, please refer to [Issue-Assigner-BaaS](https://github.com/zhingoll/Issue-Assigner-BaaS).)
 
 ## Future Plans
 - Feedback Integration: Utilize user feedback combined with the OpenRank algorithm for enhanced model evaluation (feature under development).
