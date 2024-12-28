@@ -81,7 +81,7 @@ for d in list(dev_avg_response.keys())[:5]:
 
 # ------------------ Activity data processing (with index weighting) ---------------------
 print("Fetching activity data from remote URL...")
-activity_url = "https://oss.open-digger.cn/github/X-lab2017/open-digger/activity_details.json"
+activity_url = f"https://oss.open-digger.cn/github/{owner}/{name}/activity_details.json"
 resp = requests.get(activity_url)
 if resp.status_code == 200:
     activity_data = resp.json()
