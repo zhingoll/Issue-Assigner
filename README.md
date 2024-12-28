@@ -1,7 +1,7 @@
 # Issue-Assigner
 Issue-Assigner is a comprehensive solution designed to automate the assignment of issues in a repository. It integrates seamlessly with your development workflow to recommend the most suitable developers for resolving specific issues, thereby enhancing efficiency and collaboration.
 <div align=center>
-<img src="" width="650px">
+<img src="issueassign_framework.png" width="650px">
 </div>
 <p align="center">Issue-Assigner Framework</p>
 
