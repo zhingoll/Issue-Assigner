@@ -1,7 +1,7 @@
 # Issue-Assigner
 Issue-Assigner is a comprehensive solution designed to automate the assignment of issues in a repository. It integrates seamlessly with your development workflow to recommend the most suitable developers for resolving specific issues, thereby enhancing efficiency and collaboration.
 <div align=center>
-<img src="issueassign_framework.png" width="650px">
+<img src="" width="650px">
 </div>
 <p align="center">Issue-Assigner Framework</p>
 
@@ -96,6 +96,7 @@ python .\data\mongo2neo.py
 ### Generating the Raw Materials to Build the Dataset
 Run the following command to generate the raw materials needed for model training datasets. 
 ```bash
+python .\data\issue_content.py
 python .\data\neo_mongo2csv.py
 ```
 After completion, create a new folder in the `dataset` directory, named after the repository. Then, create a subfolder named `raw` within this new folder. Move the generated CSV file into the `raw` folder, which will be used for building datasets in subsequent model training. For specific operations, refer to the example path provided in the project: `dataset\opendigger\raw\....csv`.
