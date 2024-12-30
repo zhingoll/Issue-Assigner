@@ -51,7 +51,8 @@ def load_open_issues(owner, name, repo_issues_collection):
 
 def main():
     # Load the configuration file
-    config = load_config()
+    CONFIG_FILE = os.path.join(os.path.dirname(__file__), "config.yaml")
+    config = load_config(CONFIG_FILE)
 
     # Initialize Neo4j driver and MongoDB client
     neo4j_driver = get_neo4j_driver(config['neo4j']['uri'], config['neo4j']['username'], config['neo4j']['password'])
