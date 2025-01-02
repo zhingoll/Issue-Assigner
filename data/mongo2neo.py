@@ -3,7 +3,6 @@ from py2neo import Graph, Node, Relationship
 from datetime import datetime
 import yaml
 import os
-import os
 
 def load_config(config_file="config.yaml"):
     with open(config_file, 'r') as file:
@@ -140,8 +139,8 @@ def handle_issue_events(issue_node, events):
                 user_node = add_user_node(event['actor']) if event.get('actor') else None
                 if user_node:
                     graph.create(Relationship(user_node, rel_type, issue_node, **properties))
-            elif event['type'] == 'cross-referenced' and 'source_number' in event:
-                target_pr_node = find_pr_node(event['source_number'],issue_node['repo'])
+            elif event['type'] == 'cross-referenced' and 'source' in event:
+                target_pr_node = find_pr_node(event['source'],issue_node['repo'])
                 if target_pr_node:
                     graph.create(Relationship(issue_node, rel_type, target_pr_node, **properties))
     except Exception as e:
