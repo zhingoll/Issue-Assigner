@@ -105,7 +105,7 @@
 
     container = document.createElement('div');
     container.id = 'issue-resolver-container';
-    container.style.marginTop = '20px';
+    container.style.marginBottom = '25px';
     container.style.padding = '15px';
     container.style.border = '1px solid #d1d5da';
     container.style.borderRadius = '6px';
@@ -162,6 +162,7 @@
     chartDisplayArea.style.flex = '1';
     chartDisplayArea.style.minWidth = '300px';
     chartDisplayArea.style.boxSizing = 'border-box';
+    // chartDisplayArea.style.paddingTop= '0px';
 
     container.appendChild(chartDisplayArea);
 
@@ -197,7 +198,7 @@
 
     // Create recommendation result list
     const resolverContainer = document.createElement('div');
-    resolverContainer.style.marginBottom = '20px';
+    // resolverContainer.style.marginBottom = '20px';
 
     const title = document.createElement('h3');
     title.innerText = `Model: ${recommendation.model} recommends to you:`;
@@ -206,36 +207,114 @@
 
     const list = document.createElement('ul');
     list.style.listStyleType = 'none';
-    list.style.paddingLeft = '0';
+    list.style.paddingLeft = '20px';
     resolverContainer.appendChild(list);
 
+    // recommendation.assignee.forEach((assignee, index) => {
+    //   const item = document.createElement('li');
+    //   item.style.marginBottom = '5px';
+    //   item.style.display = 'flex';
+    //   item.style.alignItems = 'center';
+
+    //   const link = document.createElement('a');
+    //   link.href = `https://github.com/${assignee}`;
+    //   link.target = '_blank';
+    //   link.innerText = assignee;
+    //   link.style.fontWeight = '600';
+    //   link.style.textDecoration = 'none';
+    //   link.style.color = '#0366d6';
+    //   link.style.marginRight = '10px';
+
+    //   const probability = recommendation.probability[index];
+
+    //   const probSpan = document.createElement('span');
+    //   probSpan.innerText = `(Probability: ${(probability * 100).toFixed(2)}%)`;
+    //   probSpan.style.color = '#586069';
+    //   probSpan.style.fontSize = '14px';
+
+    //   item.appendChild(link);
+    //   item.appendChild(probSpan);
+    //   list.appendChild(item);
+    // });
     recommendation.assignee.forEach((assignee, index) => {
       const item = document.createElement('li');
-      item.style.marginBottom = '5px';
-      item.style.display = 'flex';
-      item.style.alignItems = 'center';
+      item.style.marginBottom = '10px';
+      // Apply the common styles for the list items
+      item.style.display = 'block';
+      item.style.lineHeight = '26px';
+      item.style.position = 'relative';
+      // item.style.margin = '3px 0 0 14px';
+      item.style.marginLeft = '14px';
+      item.style.paddingLeft = '38px';
+      item.style.overflow = 'hidden';
+      item.style.wordWrap = 'normal';
+      item.style.whiteSpace = 'nowrap';
+      item.style.textOverflow = 'ellipsis';
+      
+      // Apply the numbering before pseudo-element equivalent
+      const numCircle = document.createElement('span');
+      numCircle.style.color = '#000';
+      numCircle.style.width = '21px';
+      numCircle.style.height = '21px';
+      numCircle.style.lineHeight = '20px';
+      numCircle.style.textAlign = 'center';
+      numCircle.style.position = 'absolute';
+      numCircle.style.left = '0';
+      numCircle.style.top = '5px';
+      numCircle.style.borderRadius = '100%';
+      numCircle.style.fontSize = '13px';
+      numCircle.style.backgroundColor = '#ececec';
+      numCircle.style.textShadow = '0 1px 0 rgba(255,255,255,.5)';
+      numCircle.style.fontFamily = 'SourceCodeProRegular, Menlo, Monaco, Consolas, "Courier New", monospace, Helvetica Neue, Arial, sans-serif';
+      numCircle.textContent = index + 1;  // Set the number
+      item.appendChild(numCircle);
+      
+      // Apply the special color styles for the top 3 items
+      if (index === 0) {
+          numCircle.style.backgroundColor = '#e24d46';  // First item
+          numCircle.style.color = '#fff';
+      } else if (index === 1) {
+          numCircle.style.backgroundColor = '#2ea7e0';  // Second item
+          numCircle.style.color = '#fff';
+      } else if (index === 2) {
+          numCircle.style.backgroundColor = '#6bc30d';  // Third item
+          numCircle.style.color = '#fff';
+      }
 
       const link = document.createElement('a');
       link.href = `https://github.com/${assignee}`;
       link.target = '_blank';
       link.innerText = assignee;
-      link.style.fontWeight = '600';
-      link.style.textDecoration = 'none';
-      link.style.color = '#0366d6';
-      link.style.marginRight = '10px';
+      // 设置默认字体颜色为黑色
+      link.style.color = 'black';
+      link.style.fontSize = '16px';
 
       const probability = recommendation.probability[index];
 
       const probSpan = document.createElement('span');
       probSpan.innerText = `(Probability: ${(probability * 100).toFixed(2)}%)`;
-      probSpan.style.color = '#586069';
-      probSpan.style.fontSize = '14px';
+      probSpan.style.marginLeft = '10px';
+      probSpan.style.color = '#888';
+
+      // Hover effect: change text color and underline
+      link.addEventListener('mouseenter', () => {
+        link.style.textDecoration = 'underline';
+        link.style.color = '#1E90FF';
+      });
+      link.addEventListener('mouseleave', () => {
+          link.style.textDecoration = 'none';
+          link.style.color = 'black';
+      });
 
       item.appendChild(link);
       item.appendChild(probSpan);
-      list.appendChild(item);
-    });
 
+      list.appendChild(item);
+
+      
+
+    
+   });
     resolverDisplayArea.appendChild(resolverContainer);
 
     // Fetch developer statistics and display as a stacked bar chart (only global_openrank, community_openrank, avg_activity)
@@ -260,14 +339,21 @@
       ];
 
       const chartContainer = document.createElement('div');
-      chartContainer.style.marginTop = '20px';
+      chartContainer.style.marginTop = '12px';
       chartContainer.style.width = '100%';
+
+      const title = document.createElement('h3');
+      title.innerText = `Assigned Developer Metrics Display`;
+      title.style.marginBottom = '16px';
+      title.style.textAlign = 'center';
+      chartContainer.appendChild(title);
 
       // Add legend
       const legendContainer = document.createElement('div');
       legendContainer.style.display = 'flex';
       legendContainer.style.flexWrap = 'wrap';
       legendContainer.style.marginBottom = '10px';
+      legendContainer.style.paddingLeft = '40px';
 
       metrics.forEach(m => {
         const legendItem = document.createElement('div');
@@ -276,13 +362,14 @@
         legendItem.style.marginRight = '15px';
 
         const colorBox = document.createElement('div');
-        colorBox.style.width = '15px';
-        colorBox.style.height = '15px';
+        colorBox.style.width = '14px';
+        colorBox.style.height = '14px';
         colorBox.style.backgroundColor = m.color;
         colorBox.style.marginRight = '5px';
 
         const labelSpan = document.createElement('span');
         labelSpan.innerText = m.label;
+        labelSpan.style.fontSize = '13px';
 
         legendItem.appendChild(colorBox);
         legendItem.appendChild(labelSpan);
@@ -308,18 +395,21 @@
         barContainer.style.display = 'flex';
         barContainer.style.alignItems = 'center';
         barContainer.style.marginBottom = '8px';
+        barContainer.style.paddingTop = '10px';
 
         const nameSpan = document.createElement('span');
-        nameSpan.innerText = assignee + ': ';
+        nameSpan.innerText = assignee + ' :';
         nameSpan.style.width = '120px';
         nameSpan.style.fontWeight = '600';
         nameSpan.style.color = '#24292e';
+        nameSpan.style.fontSize = '14px';
         barContainer.appendChild(nameSpan);
 
         const barWrapper = document.createElement('div');
         barWrapper.style.display = 'flex';
-        barWrapper.style.width = '100%';
+        barWrapper.style.width = '368px';
         barWrapper.style.height = '25px';
+        barWrapper.style.marginLeft = '6px';
         barWrapper.style.background = '#e1e4e8';
         barWrapper.style.position = 'relative';
         barWrapper.style.borderRadius = '4px';
@@ -380,4 +470,3 @@
     addResolverButton();
   });
 })();
-
