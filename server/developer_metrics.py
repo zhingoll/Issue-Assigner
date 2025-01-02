@@ -2,17 +2,22 @@ from datetime import datetime, timezone
 from pymongo import MongoClient
 import requests
 from clickhouse_driver import Client
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from config import ModelConf
 import math
 
-owner = "X-lab2017"
-name = "open-digger"
+print("Reading ClickHouse configurations...")
+c_conf = ModelConf("clickhouse.conf")
+owner = c_conf['owner']
+name = c_conf['name']
 
 print("Connecting to MongoDB...")
-client = MongoClient("mongodb://localhost:27017/")
-db = client["GFI-TEST1"]
+client = MongoClient(c_conf['mongodb_uri'])
+db = client[c_conf['mongodb_db']]
 
-resolved_issues = db["resolved_issue"]
+resolved_issues = db["resolved_issues"]
 developer_avg_response = db["developer_metrics"]
 
 print("Clearing old data in developer_avg_response...")
@@ -103,7 +108,7 @@ def get_last_three_months(date):
         months.append(f"{yy:04d}-{mm:02d}")
     return months
 
-threshold_date = datetime(2024, 8, 30)
+threshold_date = datetime(2024, 12, 30)
 months_to_consider = get_last_three_months(threshold_date)
 print(f"Months considered for activity data: {months_to_consider}")
 
@@ -157,8 +162,6 @@ for d in sample_devs:
 
 # ------------------------ Openrank Data Processing ------------------------
 # Using a 3-month simple average for community_openrank and globalis_openrank
-print("Reading ClickHouse configurations...")
-c_conf = ModelConf("clickhouse.conf")
 
 print("Connecting to ClickHouse...")
 ch_client = Client(

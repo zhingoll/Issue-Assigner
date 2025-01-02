@@ -22,10 +22,10 @@ CONFIG_FILE = os.path.join(os.path.dirname(__file__), "config.yaml")
 with open(CONFIG_FILE, "r", encoding="utf-8") as f:
     CONFIG = yaml.safe_load(f)
 
-MONGO_URL = CONFIG["mongodb"]["url"]
+MONGO_URI = CONFIG["mongodb"]["uri"]
 MONGO_DBNAME = CONFIG["mongodb"]["db"]
 
-mongo_client = pymongo.MongoClient(MONGO_URL)
+mongo_client = pymongo.MongoClient(MONGO_URI)
 db = mongo_client[MONGO_DBNAME]
 repoissue_col = db["repo_issues"]
 
@@ -402,7 +402,7 @@ class RepoFetcher:
                     src_issue_data = ev_raw.get("source", {}).get("issue", {})
                     cross_num = src_issue_data.get("number")
                     if cross_num:
-                        additional["source_number"] = cross_num
+                        additional["source"] = cross_num
                         # Search for the closed PR in repo_issues
                         found_pr = repoissue_col.find_one({
                             "owner": self.owner,

@@ -3,6 +3,7 @@ import yaml
 from pymongo import MongoClient
 from neo4j import GraphDatabase
 import os
+import sys
 
 # Load configuration file
 def load_config(config_path="config.yaml"):
@@ -49,13 +50,28 @@ def load_open_issues(owner, name, repo_issues_collection):
     open_issues_df = open_issues_df[['user','number', 'title', 'body']]
     return open_issues_df
 
+def create_directory(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
 def main():
     # Load the configuration file
-    config = load_config()
+    CONFIG_FILE = os.path.join(os.path.dirname(__file__), "config.yaml")
+    config = load_config(CONFIG_FILE)
+
+    # Check if the repository name is provided as a command-line argument
+    if len(sys.argv) < 2:
+        print("Usage: python neo_mongo2csv.py <repository_name>")
+        sys.exit(1)
+    repo_name = sys.argv[1]
+
+    # Path where the CSV files will be stored
+    dataset_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), f"dataset/{repo_name}/raw")
+    create_directory(dataset_path)  # Ensure the directory exists
 
     # Initialize Neo4j driver and MongoDB client
     neo4j_driver = get_neo4j_driver(config['neo4j']['uri'], config['neo4j']['username'], config['neo4j']['password'])
-    mongo_client = get_mongo_client(config['mongodb']['url'])
+    mongo_client = get_mongo_client(config['mongodb']['uri'])
     
     # Get collections from MongoDB
     db = mongo_client[config['mongodb']['db']]
@@ -88,17 +104,17 @@ def main():
     
     # Retrieve data from Neo4j
     data = fetch_data_from_neo4j(neo4j_driver, query)
-    data.to_csv('user_issue.csv', index=False)
+    data.to_csv(os.path.join(dataset_path, 'user_issue.csv'), index=False)
 
     # Load Issue data from MongoDB
     open_issues_df = load_open_issues(config['repo']['owner'], config['repo']['name'], repo_issues_collection)
-    open_issues_df.to_csv('open_issues.csv', index=False)
+    open_issues_df.to_csv(os.path.join(dataset_path, 'opened_issues.csv'), index=False)
 
     resolved_issues_df = load_resolved_issues(config['repo']['owner'], config['repo']['name'], resolved_issues_collection)
-    resolved_issues_df.to_csv('resolved_issues.csv', index=False)
+    resolved_issues_df.to_csv(os.path.join(dataset_path, 'resolved_issues.csv'), index=False)
 
     issue_content_df = load_issue_content(config['repo']['owner'], config['repo']['name'], issues_collection)
-    issue_content_df.to_csv('issue_content.csv', index=False)
+    issue_content_df.to_csv(os.path.join(dataset_path, 'issue_content.csv'), index=False)
 
 if __name__ == "__main__":
     main()

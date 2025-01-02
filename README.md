@@ -1,4 +1,4 @@
-# Issue-Assigner
+# Issue-Assigner(Chinese name: Lingpei)
 Issue-Assigner is a comprehensive solution designed to automate the assignment of issues in a repository. It integrates seamlessly with your development workflow to recommend the most suitable developers for resolving specific issues, thereby enhancing efficiency and collaboration.
 <div align=center>
 <img src="issueassign_framework.png" width="650px">
@@ -97,9 +97,16 @@ python .\data\mongo2neo.py
 Run the following command to generate the raw materials needed for model training datasets. 
 ```bash
 python .\data\issue_content.py
-python .\data\neo_mongo2csv.py
+python .\data\neo_mongo2csv.py opendigger
 ```
-After completion, create a new folder in the `dataset` directory, named after the repository. Then, create a subfolder named `raw` within this new folder. Move the generated CSV file into the `raw` folder, which will be used for building datasets in subsequent model training. For specific operations, refer to the example path provided in the project: `dataset\opendigger\raw\....csv`.
+Once the script has run, it will automatically create a new folder named after the specified repository within the `dataset` directory. Additionally, within this new folder, the script will also create a subfolder named `raw`. All generated CSV files will be automatically saved in this `raw` folder, thus being immediately ready for use in subsequent model training dataset construction.
+Here are specific examples of where the CSV files will be saved. If the repository name specified is "opendigger," then the paths for the saved CSV files will appear as follows:
+```bash
+dataset\opendigger\raw\user_issue.csv 
+dataset\opendigger\raw\open_issues.csv 
+dataset\opendigger\raw\resolved_issues.csv 
+dataset\opendigger\raw\issue_content.csv
+```
 ### Running the Main Application
 Navigate to the project's root directory and run:
 ```bash

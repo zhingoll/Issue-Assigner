@@ -32,13 +32,13 @@ CONFIG_FILE = os.path.join(os.path.dirname(__file__), "config.yaml")
 with open(CONFIG_FILE, "r", encoding="utf-8") as f:
     CONFIG = yaml.safe_load(f)
 
-MONGO_URL = CONFIG["mongodb"]["url"]
+MONGO_URI = CONFIG["mongodb"]["uri"]
 MONGO_DBNAME = CONFIG["mongodb"]["db"]
 TOKENS = CONFIG["tokens"]
 
 
 # Initialize database
-client = pymongo.MongoClient(MONGO_URL)
+client = pymongo.MongoClient(MONGO_URI)
 db = client[MONGO_DBNAME]
 
 repo_col = db["repos"]           # Stores repository information
@@ -518,7 +518,7 @@ def main():
         logger.setLevel(logging.DEBUG)
 
     if not args.repos:
-        repos = ["microsoft/vscode"]
+        repos = ["X-lab2017/opendigger"]
     else:
         repos = args.repos.split(",")
 

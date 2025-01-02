@@ -2,49 +2,50 @@ from pymongo import MongoClient
 from py2neo import Graph, Node, Relationship
 from datetime import datetime
 import yaml
+import os
 
 def load_config(config_file="config.yaml"):
     with open(config_file, 'r') as file:
         return yaml.safe_load(file)
 
 # Load configuration from the configuration file
-config = load_config()
+CONFIG_FILE = os.path.join(os.path.dirname(__file__), "config.yaml")
+config = load_config(CONFIG_FILE)
 
 # MongoDB configuration
-mongo_url = config['mongodb']['url']
+mongo_uri = config['mongodb']['uri']
 mongo_db_name = config['mongodb']['db']
-mongo_client = MongoClient(mongo_url)
+mongo_client = MongoClient(mongo_uri)
 db = mongo_client[mongo_db_name]
-db_collections = config['db_collections']
 
 # Neo4j configuration
-neo4j_url = config['neo4j']['url']
+neo4j_uri = config['neo4j']['uri']
 neo4j_username = config['neo4j']['username']
 neo4j_password = config['neo4j']['password']
-graph = Graph(neo4j_url, auth=(neo4j_username, neo4j_password))
+graph = Graph(neo4j_uri, auth=(neo4j_username, neo4j_password))
 # repo_issues = db['repo_issue']
 
-# # Use for deletion
-# # Delete nodes and relationships in batches
-# def delete_in_batches(graph, batch_size):
-#     query = """
-#     MATCH (n)
-#     WITH n LIMIT $batchSize
-#     DETACH DELETE n
-#     RETURN count(n) as deletedCount
-#     """
-#     return graph.run(query, batchSize=batch_size).evaluate()  # Execute the query and return the number of nodes deleted
-#
-# # Loop until no data is left to delete
-# total_deleted = 0
-# while True:
-#     deleted_count = delete_in_batches(graph, 10000) 
-#     if deleted_count == 0:
-#         break
-#     total_deleted += deleted_count
-#     print(f"Deleted {deleted_count} nodes in this batch, total deleted: {total_deleted}")
-#
-# print("All data deleted successfully.")
+# Use for deletion
+# Delete nodes and relationships in batches
+def delete_in_batches(graph, batch_size):
+    query = """
+    MATCH (n)
+    WITH n LIMIT $batchSize
+    DETACH DELETE n
+    RETURN count(n) as deletedCount
+    """
+    return graph.run(query, batchSize=batch_size).evaluate()  # Execute the query and return the number of nodes deleted
+
+# Loop until no data is left to delete
+total_deleted = 0
+while True:
+    deleted_count = delete_in_batches(graph, 10000) 
+    if deleted_count == 0:
+        break
+    total_deleted += deleted_count
+    print(f"Deleted {deleted_count} nodes in this batch, total deleted: {total_deleted}")
+
+print("All data deleted successfully.")
 
 def format_datetime(dt):
     """Helper function to format datetime objects for Neo4j."""
@@ -161,10 +162,13 @@ def handle_pr_events(pr_node,events):
 
 # Import data
 # Since issues and PRs have referencing relationships, we focus on the PR resolving issue references here, so PRs need to be created first
-db_collection = ['open_issue', 'resolved_issue', 'open_pr', 'closed_pr']
+db_collection = ['open_issues', 'resolved_issues', 'open_prs', 'closed_prs']
 def import_data():  
     tx = graph.begin()
-    query_conditions = {"owner": "microsoft", "name": "vscode"}
+    query_conditions = {"owner": config['repo']['owner'], "name": config['repo']['name']}
+    print("Owner:", config['repo']['owner'])
+    print("Name:", config['repo']['name'])
+    print("Query conditions:", query_conditions)
     print("begin open_pr")
     try:
         i = 0
