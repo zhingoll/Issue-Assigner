@@ -4,8 +4,9 @@ import pandas as pd
 from torch_geometric.data import InMemoryDataset, HeteroData,Data
 from sklearn.feature_extraction.text import TfidfVectorizer
 from torch_geometric.transforms import ToUndirected
-from tools.nlp import clean_text
 import torch.nn as nn
+from tools.nlp import clean_text
+
 class IssueAssignDataset(InMemoryDataset):
     def __init__(self, root, hetero=True, transform=None, pre_transform=None):
         self.hetero = hetero
@@ -361,9 +362,93 @@ class IssueAssignDataset(InMemoryDataset):
 
         return filtered_participate_edge_index, filtered_participate_edge_weight
 
+import networkx as nx
+import matplotlib.pyplot as plt
+
+def analyze_network(data, user_mapping, issue_mapping):
+    """
+    Analyzing the classical index and degree distribution of complex networks
+    Consider only the relationship ('user','participant','issue')
+    And the node label is consistent with the actual data
+    """
+    relation = ('user', 'participate', 'issue')
+    if relation not in data.edge_index_dict:
+        print(f"Relationship {relation} not in DB.")
+        return
+
+    edge_index = data.edge_index_dict[relation]  # [2, num_edges]
+
+    user_mapping_inv = {idx: user for user, idx in user_mapping.items()}
+    issue_mapping_inv = {idx: issue for issue, idx in issue_mapping.items()}
+
+    user_indices = edge_index[0].numpy()
+    issue_indices = edge_index[1].numpy()
+
+    user_names = [user_mapping_inv[idx] for idx in user_indices]
+    issue_numbers = [issue_mapping_inv[idx] for idx in issue_indices]
+
+    G = nx.Graph()
+    G.add_nodes_from(user_mapping.keys(), bipartite='user', type='user')
+    G.add_nodes_from(issue_mapping.keys(), bipartite='issue', type='issue')
+
+    edges = list(zip(user_names, issue_numbers))
+    G.add_edges_from(edges)
+
+    degrees = dict(G.degree())
+    degree_values = list(degrees.values())
+
+    num_nodes = G.number_of_nodes()
+    num_edges = G.number_of_edges()
+    average_degree = sum(degree_values) / num_nodes if num_nodes > 0 else 0
+    density = nx.density(G)
+    average_clustering = nx.average_clustering(G) if num_nodes > 0 else 0
+    number_of_connected_components = nx.number_connected_components(G)
+    if nx.is_connected(G):
+        diameter = nx.diameter(G)
+    else:
+        diameters = []
+        for component in nx.connected_components(G):
+            subgraph = G.subgraph(component)
+            if subgraph.number_of_nodes() > 1:
+                diameters.append(nx.diameter(subgraph))
+        diameter = max(diameters) if diameters else "∞"
+
+    print("=== Complex Network Metrics ===")
+    print(f"Number of Nodes: {num_nodes}")
+    print(f"Number of Edges: {num_edges}")
+    print(f"Average Degree: {average_degree:.2f}")
+    print(f"Density: {density:.4f}")
+    print(f"Average Clustering Coefficient: {average_clustering:.4f}")
+    print(f"Number of Connected Components: {number_of_connected_components}")
+    print(f"Diameter of the Graph: {diameter}")
+
+    # Plot degree distribution
+    plt.figure(figsize=(8, 6))
+    plt.hist(degree_values, bins=50, edgecolor='black',log=True)
+    plt.title("Degree Distribution")
+    plt.xlabel("Degree")
+    plt.ylabel("Number of Nodes")
+    plt.grid(True)
+    plt.show()
+
+    plt.figure(figsize=(12, 12))
+    pos = nx.spring_layout(G, k=0.1, seed=42)
+    user_nodes = list(user_mapping.keys())
+    issue_nodes = list(issue_mapping.keys())
+    nx.draw_networkx_nodes(G, pos, nodelist=user_nodes, node_color='blue', node_size=50, label='User')
+    nx.draw_networkx_nodes(G, pos, nodelist=issue_nodes, node_color='red', node_size=50, label='Issue')
+    nx.draw_networkx_edges(G, pos, alpha=0.3)
+    plt.legend(scatterpoints=1)
+    plt.title("user-participate-issue")
+    plt.axis('off')
+    plt.show()
+
+
 def dataset_to_graph(dataset_name, hetero):
     print("Loading node and edge data...")
     dataset = IssueAssignDataset(os.path.abspath(os.path.join('dataset', dataset_name)), hetero=hetero)
-    data = dataset[0]
+    data = dataset[0] 
     user_mapping, issue_mapping = torch.load(os.path.join(dataset.processed_dir, 'mappings.pt'))
+    # analyze_network(data,user_mapping, issue_mapping)
     return data, user_mapping, issue_mapping
+
