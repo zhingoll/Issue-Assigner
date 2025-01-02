@@ -12,8 +12,6 @@ def load_config(config_file="config.yaml"):
 # Load configuration from the configuration file
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), "config.yaml")
 config = load_config(CONFIG_FILE)
-CONFIG_FILE = os.path.join(os.path.dirname(__file__), "config.yaml")
-config = load_config(CONFIG_FILE)
 
 # MongoDB configuration
 mongo_uri = config['mongodb']['uri']
@@ -165,7 +163,6 @@ def handle_pr_events(pr_node,events):
 
 # Import data
 # Since issues and PRs have referencing relationships, we focus on the PR resolving issue references here, so PRs need to be created first
-db_collection = ['open_issues', 'resolved_issues', 'open_prs', 'closed_prs']
 db_collection = ['open_issues', 'resolved_issues', 'open_prs', 'closed_prs']
 def import_data():  
     tx = graph.begin()
