@@ -3,12 +3,15 @@ from py2neo import Graph, Node, Relationship
 from datetime import datetime
 import yaml
 import os
+import os
 
 def load_config(config_file="config.yaml"):
     with open(config_file, 'r') as file:
         return yaml.safe_load(file)
 
 # Load configuration from the configuration file
+CONFIG_FILE = os.path.join(os.path.dirname(__file__), "config.yaml")
+config = load_config(CONFIG_FILE)
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), "config.yaml")
 config = load_config(CONFIG_FILE)
 
@@ -139,8 +142,8 @@ def handle_issue_events(issue_node, events):
                 user_node = add_user_node(event['actor']) if event.get('actor') else None
                 if user_node:
                     graph.create(Relationship(user_node, rel_type, issue_node, **properties))
-            elif event['type'] == 'cross-referenced' and 'source' in event:
-                target_pr_node = find_pr_node(event['source'],issue_node['repo'])
+            elif event['type'] == 'cross-referenced' and 'source_number' in event:
+                target_pr_node = find_pr_node(event['source_number'],issue_node['repo'])
                 if target_pr_node:
                     graph.create(Relationship(issue_node, rel_type, target_pr_node, **properties))
     except Exception as e:
@@ -162,6 +165,7 @@ def handle_pr_events(pr_node,events):
 
 # Import data
 # Since issues and PRs have referencing relationships, we focus on the PR resolving issue references here, so PRs need to be created first
+db_collection = ['open_issues', 'resolved_issues', 'open_prs', 'closed_prs']
 db_collection = ['open_issues', 'resolved_issues', 'open_prs', 'closed_prs']
 def import_data():  
     tx = graph.begin()
