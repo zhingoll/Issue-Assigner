@@ -16,10 +16,10 @@ CONFIG_FILE = os.path.join(os.path.dirname(__file__), "config.yaml")
 with open(CONFIG_FILE, "r", encoding="utf-8") as f:
     CONFIG = yaml.safe_load(f)
 
-MONGO_URL = CONFIG["mongodb"]["url"]
+MONGO_URI = CONFIG["mongodb"]["uri"]
 MONGO_DBNAME = CONFIG["mongodb"]["db"]
 
-client = pymongo.MongoClient(MONGO_URL)
+client = pymongo.MongoClient(MONGO_URI)
 db = client[MONGO_DBNAME]
 
 repo_issues = db["repo_issues"]            
@@ -125,6 +125,11 @@ def get_dataset_for_repo(
 
     logger.info(f"Finished dataset update for {owner}/{name}")
 
+# Load configuration file
+def load_config(config_path="config.yaml"):
+    with open(config_path, 'r') as file:
+        config = yaml.safe_load(file)
+    return config
 
 def get_dataset_all(n_process: Optional[int] = None):
     """
@@ -134,7 +139,11 @@ def get_dataset_all(n_process: Optional[int] = None):
     # Example: If you want to loop over all repos in your 'repos' collection, do:
     # all_repos = list(repos_col.find({}))
     # or if you only want a single repo for demonstration:
-    all_repos = [("X-lab2017", "open-digger")]  # Hard-coded example
+
+    CONFIG_FILE = os.path.join(os.path.dirname(__file__), "config.yaml")
+    config = load_config(CONFIG_FILE)
+    all_repos = [(config['repo']['owner'], config['repo']['name'])]
+
 
     if not n_process:
         # Single-process
