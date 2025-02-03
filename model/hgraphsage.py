@@ -20,7 +20,7 @@ class HGraphSage(GraphBaseModel):
         self.in_channels = int(self.config["hyperparameter"]['in_channels'])
         self.hidden_channels = int(self.config["hyperparameter"]['hidden_channels'])
         self.out_channels = int(self.config["hyperparameter"]['out_channels'])
-        self.dropout = int(self.config["hyperparameter"]['dropout'])
+        self.dropout = float(self.config["hyperparameter"]['dropout'])
         self.model = HeteroGraphSAGE(self.in_channels,self.hidden_channels, self.out_channels,self.dropout).to(device)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learningRate)
         self.criterion = nn.BCEWithLogitsLoss()
@@ -220,7 +220,9 @@ class HGraphSage(GraphBaseModel):
                 issue_global_indices = subgraph['issue'].n_id.cpu().numpy()  # Global index
                 # Create reverse issue mapping
                 issue_mapping_inv = {idx: number for number, idx in self.issue_mapping.items()}
+                print(f"self.issue_mapping: {self.issue_mapping}")
                 open_issue_numbers = [issue_mapping_inv[idx] for idx in issue_global_indices]
+                print(f"Open issue numbers: {open_issue_numbers}")
 
                 # Save prediction results
                 for issue_number, user_names, scores in zip(open_issue_numbers, user_names_array, top_k_scores.cpu().numpy()):
