@@ -39,7 +39,7 @@
     button.style.zIndex = '1000'; 
     button.classList.add('btn', 'btn-sm', 'btn-primary'); // Using GitHub's btn-primary style
 
-    const actionsBar = document.querySelector('.gh-header-actions');
+    const actionsBar = document.querySelector('[data-component="PH_Title"]');
     if (actionsBar) {
       console.log('Found actions bar');
       actionsBar.appendChild(button);
@@ -167,7 +167,7 @@
     container.appendChild(chartDisplayArea);
 
     // Add to page
-    const discussionTimeline = document.querySelector('.js-discussion');
+    const discussionTimeline = document.querySelector('.dkqtNN');
     if (discussionTimeline) {
       discussionTimeline.parentNode.insertBefore(container, discussionTimeline);
     } else {
